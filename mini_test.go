@@ -760,3 +760,40 @@ float=1222.7`
 		}
 	}
 }
+
+func TestWriteFunction(t *testing.T) {
+
+	simpleIni := `notsection=true
+alsonotsection=true
+
+[section_one]
+first=raz
+int=124
+float=1222.7
+
+[section_two]
+orly=true
+
+[section_three]
+int=555
+float=124.3`
+
+	config, err := LoadConfigurationFromReader(strings.NewReader(simpleIni))
+
+	assert.Nil(t, err, "Sectioned configuration should load without error.")
+
+	config.SetStringForSection("section_one", "first", "pootie")
+	assert.Equal(t, config.StringFromSection("section_one", "first", ""), "pootie", "String value not updated.")
+
+	config.SetStringForSection("section_one", "second", "base")
+	assert.Equal(t, config.StringFromSection("section_one", "second", ""), "base", "String value not added.")
+
+	config.SetBooleanForSection("section_two", "orly", false)
+	assert.Equal(t, config.BooleanFromSection("section_two", "orly", true), false, "Boolean value not updated.")
+
+	config.SetBooleanForSection("section_two", "yarly", true)
+	assert.Equal(t, config.BooleanFromSection("section_two", "yarly", false), true, "Boolean value not added.")
+
+	err = config.WriteSectionsToFile("testconfig.txt")
+	assert.Nil(t, err, "could not write sectioned configuration.")
+}
